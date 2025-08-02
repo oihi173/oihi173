@@ -1,13 +1,3 @@
---[[
-Blade Ball Script: Auto Parry + Painel GUI (Mover, Fechar, Fusão)
-Feito por Copilot
-
-ATENÇÃO:
-- Use com cuidado, scripts de terceiros podem levar a banimentos.
-- Adapte a função de "fusão" conforme sua habilidade.
-]]
-
--- Função de auto parry (defender bola automaticamente)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
