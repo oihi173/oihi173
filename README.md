@@ -1,5 +1,3 @@
--- Painel com Fly, View Players e ESP (LocalScript)
-
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
