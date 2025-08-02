@@ -1,168 +1,94 @@
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "EspicFacePanel"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Criando a interface
-local screenGui = Instance.new("ScreenGui", player.PlayerGui)
-screenGui.Name = "FlyESPPanel"
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0, 300, 0, 180)
+panel.Position = UDim2.new(0.5, -150, 0.5, -90)
+panel.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+panel.BorderSizePixel = 0
+panel.Name = "Panel"
+panel.Active = true
+panel.Draggable = true
+panel.Parent = screenGui
 
-local frame = Instance.new("Frame", screenGui)
-frame.Position = UDim2.new(0, 20, 0, 100)
-frame.Size = UDim2.new(0, 200, 0, 240)
-frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-frame.BackgroundTransparency = 0.2
+-- Botão para fechar/abrir
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 30, 0, 30)
+toggleBtn.Position = UDim2.new(1, -35, 0, 5)
+toggleBtn.Text = "-"
+toggleBtn.BackgroundColor3 = Color3.fromRGB(120, 60, 60)
+toggleBtn.Parent = panel
 
-local uiListLayout = Instance.new("UIListLayout", frame)
-uiListLayout.Padding = UDim.new(0,10)
+-- Carinha Espic Face (exemplo)
+local espicLabel = Instance.new("TextLabel")
+espicLabel.Size = UDim2.new(0, 60, 0, 60)
+espicLabel.Position = UDim2.new(0, 10, 0, 10)
+espicLabel.Text = "😏" -- Espic Face
+espicLabel.TextScaled = true
+espicLabel.BackgroundTransparency = 1
+espicLabel.Parent = panel
 
-local function addButton(name)
-    local btn = Instance.new("TextButton", frame)
-    btn.Size = UDim2.new(1, -20, 0, 40)
-    btn.Position = UDim2.new(0,10,0,0)
+-- Função para criar botões
+local function createButton(name, pos, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 110, 0, 32)
+    btn.Position = UDim2.new(0, pos.X, 0, pos.Y)
     btn.Text = name
-    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    btn.BackgroundColor3 = Color3.fromRGB(80, 80, 120)
     btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 22
-    btn.AutoButtonColor = true
+    btn.Parent = panel
+    btn.MouseButton1Click:Connect(callback)
     return btn
 end
 
-local flyBtn = addButton("Fly: OFF")
-local viewPlayersBtn = addButton("View Players")
-local espBtn = addButton("ESP: OFF")
+-- Botões e funções (exemplos)
+local function esp() print("ESP ativado") end
+local function unesp() print("ESP desativado") end
+local function flw() print("Fly ativado") end
+local function unfly() print("Fly desativado") end
+local function view() print("View ativado") end
+local function pleyer() print("Player selecionado") end
+local function unview() print("Unview ativado") end
+local function fling() print("Fling ativado") end
+local function unfling() print("Fling desativado") end
 
--- FLY FUNCTIONALITY
-local flying = false
-local speed = 50
-local bodyGyro, bodyVelocity
+createButton("ESP", Vector2.new(80, 10), esp)
+createButton("UNESP", Vector2.new(80, 50), unesp)
+createButton("FLW", Vector2.new(80, 90), flw)
+createButton("UNFLY", Vector2.new(80, 130), unfly)
+createButton("VIEW", Vector2.new(200, 10), view)
+createButton("PLEYER", Vector2.new(200, 50), pleyer)
+createButton("UNVIEW", Vector2.new(200, 90), unview)
+createButton("FLING", Vector2.new(200, 130), fling)
+createButton("UNFLING", Vector2.new(80, 170), unfling)
 
-local function fly()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-    bodyGyro = Instance.new("BodyGyro", root)
-    bodyGyro.P = 9e4
-    bodyGyro.MaxTorque = Vector3.new(9e9,9e9,9e9)
-    bodyGyro.CFrame = root.CFrame
-
-    bodyVelocity = Instance.new("BodyVelocity", root)
-    bodyVelocity.MaxForce = Vector3.new(9e9,9e9,9e9)
-    bodyVelocity.Velocity = Vector3.new(0,0,0)
-
-    flying = true
-    flyBtn.Text = "Fly: ON"
-
-    while flying do
-        local cam = workspace.CurrentCamera
-        local moveDir = Vector3.new()
-        if UIS:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
-        if UIS:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
-        if UIS:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
-        if UIS:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
-        bodyVelocity.Velocity = moveDir.Magnitude > 0 and moveDir.Unit * speed or Vector3.new()
-        bodyGyro.CFrame = cam.CFrame
-        game:GetService("RunService").RenderStepped:Wait()
+-- Mexer personagem sozinho (exemplo simples)
+local function mexerPersonagem()
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0,0,10)
     end
-    if bodyGyro then bodyGyro:Destroy() end
-    if bodyVelocity then bodyVelocity:Destroy() end
-    flyBtn.Text = "Fly: OFF"
 end
 
-local function stopFly()
-    flying = false
-end
+-- Exemplo: mover personagem ao clicar na carinha
+espicLabel.MouseButton1Click:Connect(mexerPersonagem)
 
-flyBtn.MouseButton1Click:Connect(function()
-    if not flying then
-        fly()
-    else
-        stopFly()
-    end
-end)
-
--- VIEW PLAYERS FUNCTIONALITY
-viewPlayersBtn.MouseButton1Click:Connect(function()
-    local playerList = {}
-    for _,plr in ipairs(Players:GetPlayers()) do
-        table.insert(playerList, plr.Name)
-    end
-    local msg = "Jogadores:\n" .. table.concat(playerList, "\n")
-    local popup = Instance.new("TextLabel", screenGui)
-    popup.Size = UDim2.new(0,200,0,200)
-    popup.Position = UDim2.new(0,230,0,100)
-    popup.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    popup.TextColor3 = Color3.new(1,1,1)
-    popup.Text = msg
-    popup.Font = Enum.Font.SourceSans
-    popup.TextSize = 20
-    popup.TextWrapped = true
-    popup.TextYAlignment = Enum.TextYAlignment.Top
-    popup.ZIndex = 10
-    popup.Name = "PlayersPopup"
-
-    wait(3)
-    if popup then popup:Destroy() end
-end)
-
--- ESP FUNCTIONALITY
-local espOn = false
-local espObjects = {}
-
-local function addEsp(plr)
-    if plr == player then return end
-    local char = plr.Character
-    if not char then return end
-    local head = char:FindFirstChild("Head")
-    if not head then return end
-
-    local billboard = Instance.new("BillboardGui", head)
-    billboard.Name = "ESPBillboard"
-    billboard.Size = UDim2.new(0,100,0,40)
-    billboard.AlwaysOnTop = true
-
-    local label = Instance.new("TextLabel", billboard)
-    label.Size = UDim2.new(1,0,1,0)
-    label.BackgroundTransparency = 1
-    label.Text = plr.Name
-    label.TextColor3 = Color3.new(1,0,0)
-    label.Font = Enum.Font.SourceSansBold
-    label.TextSize = 18
-    table.insert(espObjects, billboard)
-end
-
-local function removeEsp()
-    for _,esp in ipairs(espObjects) do
-        if esp and esp.Parent then esp:Destroy() end
-    end
-    espObjects = {}
-end
-
-espBtn.MouseButton1Click:Connect(function()
-    espOn = not espOn
-    espBtn.Text = espOn and "ESP: ON" or "ESP: OFF"
-    removeEsp()
-    if espOn then
-        for _,plr in ipairs(Players:GetPlayers()) do
-            addEsp(plr)
+-- Abrir/fechar painel
+local aberto = true
+toggleBtn.MouseButton1Click:Connect(function()
+    aberto = not aberto
+    for _,v in ipairs(panel:GetChildren()) do
+        if v ~= toggleBtn then
+            v.Visible = aberto
         end
     end
+    toggleBtn.Text = aberto and "-" or "+"
 end)
 
-Players.PlayerAdded:Connect(function(plr)
-    if espOn then
-        plr.CharacterAdded:Connect(function()
-            wait(1)
-            addEsp(plr)
-        end)
+-- Inicialmente aberto
+for _,v in ipairs(panel:GetChildren()) do
+    if v ~= toggleBtn then
+        v.Visible = true
     end
-end)
-Players.PlayerRemoving:Connect(function(plr)
-    removeEsp()
-    if espOn then
-        for _,plr in ipairs(Players:GetPlayers()) do
-            addEsp(plr)
-        end
-    end
-end)
-
--- FIM DO SCRIPT
+end
