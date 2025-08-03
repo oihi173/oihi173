@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
 
 -- Função para criar GUI
 local function CreateGuiElement(class, props)
@@ -71,12 +72,112 @@ local mainFrame = CreateGuiElement("Frame", {
     BorderColor3 = Color3.fromRGB(255,255,0),
     Visible = true,
 })
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+-- Painel de movimentação lateral
+local dragBar = CreateGuiElement("Frame", {
+    Parent = mainFrame,
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1,0,0,30),
+    Position = UDim2.new(0,0,0,0),
+    Name = "DragBar"
+})
+
+local closeButton = CreateGuiElement("TextButton", {
+    Parent = dragBar,
+    Size = UDim2.new(0,30,0,30),
+    Position = UDim2.new(1,-30,0,0),
+    BackgroundColor3 = Color3.fromRGB(255,60,60),
+    Text = "X",
+    TextColor3 = Color3.new(1,1,1),
+    Font = Enum.Font.FredokaOne,
+    TextSize = 20,
+    BorderSizePixel = 0,
+    Name = "CloseBtn"
+})
+
+local openButton = CreateGuiElement("TextButton", {
+    Parent = screenGui,
+    Size = UDim2.new(0, 50, 0, 40),
+    Position = UDim2.new(0, 10, 0.5, -20),
+    BackgroundColor3 = Color3.fromRGB(255, 255, 0),
+    Text = ">",
+    TextColor3 = Color3.new(0,0,0),
+    Font = Enum.Font.FredokaOne,
+    TextSize = 30,
+    BorderSizePixel = 0,
+    Visible = false,
+    Name = "OpenBtn"
+})
+
+local isOpen = true
+
+-- Abrir/fechar painel com animação
+local function togglePanel()
+    if isOpen then
+        isOpen = false
+        TweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0, -420, 0.5, -175)
+        }):Play()
+        wait(0.32)
+        mainFrame.Visible = false
+        openButton.Visible = true
+    else
+        openButton.Visible = false
+        mainFrame.Visible = true
+        TweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0.5, -205, 0.5, -175)
+        }):Play()
+        isOpen = true
+    end
+end
+
+closeButton.MouseButton1Click:Connect(togglePanel)
+openButton.MouseButton1Click:Connect(togglePanel)
+
+-- Movimento lateral com setas
+local moveAmount = 50
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if not isOpen then return end
+    if input.KeyCode == Enum.KeyCode.Right then
+        local newX = mainFrame.Position.X.Offset + moveAmount
+        TweenService:Create(mainFrame, TweenInfo.new(0.2), {Position = UDim2.new(mainFrame.Position.X.Scale, math.clamp(newX, -205, workspace.CurrentCamera.ViewportSize.X-410), mainFrame.Position.Y.Scale, mainFrame.Position.Y.Offset)}):Play()
+    elseif input.KeyCode == Enum.KeyCode.Left then
+        local newX = mainFrame.Position.X.Offset - moveAmount
+        TweenService:Create(mainFrame, TweenInfo.new(0.2), {Position = UDim2.new(mainFrame.Position.X.Scale, math.clamp(newX, 0, workspace.CurrentCamera.ViewportSize.X-410), mainFrame.Position.Y.Scale, mainFrame.Position.Y.Offset)}):Play()
+    end
+end)
+
+-- Drag manual (opcional: já está ativo/draggable, mas para mobile pode fazer assim)
+local dragging, dragInput, dragStart, startPos
+dragBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+dragBar.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Conteúdo do painel
 local trollFace2 = trollFace:Clone()
 trollFace2.Parent = mainFrame
-trollFace2.Position = UDim2.new(0.5, -50, 0, 10)
+trollFace2.Position = UDim2.new(0.5, -50, 0, 40)
 local title2 = title:Clone()
 title2.Parent = mainFrame
-title2.Position = UDim2.new(0, 0, 0, 120)
+title2.Position = UDim2.new(0, 0, 0, 150)
 
 -- Botões
 local options = {
@@ -95,7 +196,7 @@ local states = {
     esp_innocent = false
 }
 
-local y = 170
+local y = 200
 for i, opt in ipairs(options) do
     local btn = CreateGuiElement("TextButton", {
         Parent = mainFrame,
@@ -166,102 +267,25 @@ function AddESP(player, color)
     local txt = Instance.new("TextLabel", box)
     txt.Size = UDim2.new(1,0,1,0)
     txt.BackgroundTransparency = 1
-    txt.Text = player.DisplayName or player.Name
-    txt.TextColor3 = color
+    txt.Text = player.Name
+    txt.TextColor3 = color or Color3.new(1,1,1)
     txt.Font = Enum.Font.FredokaOne
-    txt.TextStrokeTransparency = 0.5
-    txt.TextSize = 16
+    txt.TextSize = 18
+    box.Parent = mainFrame
     table.insert(espObjects, box)
 end
 
--- Detecção de papéis
-local function GetRole(p)
-    local backpack = p:FindFirstChild("Backpack") or p:FindFirstChildOfClass("Backpack")
-    if backpack then
-        if backpack:FindFirstChild("Knife") then return "Assassino" end
-        if backpack:FindFirstChild("Gun") then return "Xerife" end
-    end
-    local char = p.Character
-    if char then
-        if char:FindFirstChild("Knife") then return "Assassino" end
-        if char:FindFirstChild("Gun") then return "Xerife" end
-    end
-    return "Inocente"
-end
-
--- Loop ESP
-spawn(function()
-    while true do
-        RemoveAllESP()
-        for _,p in pairs(Players:GetPlayers()) do
-            local role = GetRole(p)
-            if states.esp_murder and role == "Assassino" then AddESP(p, Color3.new(1,0,0)) end
-            if states.esp_sheriff and role == "Xerife" then AddESP(p, Color3.new(0,0,1)) end
-            if states.esp_innocent and role == "Inocente" then AddESP(p, Color3.new(0,1,0)) end
-        end
-        wait(0.5)
+-- Atalho: abrir/fechar com tecla F (opcional)
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.F then
+        togglePanel()
     end
 end)
 
--- Auto Farm: Noclip + voar até moeda
-local function Noclip()
-    local char = LocalPlayer.Character
-    if char then
-        for _,v in pairs(char:GetChildren()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
-            end
-        end
-    end
-end
-
-local function GetNearestCoin()
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
-    local pos = char.HumanoidRootPart.Position
-    local nearest, dist = nil, math.huge
-    for _,v in pairs(workspace:GetDescendants()) do
-        if v.Name == "Coin" and v:IsA("BasePart") and v.Transparency < 1 then
-            local d = (v.Position - pos).magnitude
-            if d < dist then
-                nearest = v
-                dist = d
-            end
-        end
-    end
-    return nearest
-end
-
-spawn(function()
-    while true do
-        if states.autofarm then
-            Noclip()
-            local char = LocalPlayer.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            local coin = GetNearestCoin()
-            if root and coin then
-                -- Voa para moeda
-                root.CFrame = root.CFrame:Lerp(CFrame.new(coin.Position + Vector3.new(0,3,0)), 0.25)
-            end
-        end
-        wait(0.1)
-    end
-end)
-
--- Auto Shot (exemplo básico)
-spawn(function()
-    while true do
-        if states.autoshoot then
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("Gun") then
-                for _,p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and GetRole(p) == "Assassino" then
-                        -- Tenta mirar e atirar (depende do executor e API)
-                        -- Exemplo: char.Gun:FireServer(p.Character.HumanoidRootPart.Position)
-                    end
-                end
-            end
-        end
-        wait(0.4)
+-- Botão de abrir aparece após fechar
+mainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
+    if not mainFrame.Visible then
+        openButton.Visible = true
     end
 end)
