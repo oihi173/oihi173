@@ -1,201 +1,162 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 
--- Criar GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RedzHubPanel"
-ScreenGui.Parent = game.CoreGui
+--// GUI: Tela de Carregamento
+local loadingScreen = Instance.new("ScreenGui", game.CoreGui)
+loadingScreen.Name = "MM2LoadingScreen"
+local frame = Instance.new("Frame", loadingScreen)
+frame.Size = UDim2.new(1,0,1,0)
+frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+local label = Instance.new("TextLabel", frame)
+label.Size = UDim2.new(1,0,1,0)
+label.Text = "Bem-vindo"
+label.Font = Enum.Font.GothamSemibold
+label.TextColor3 = Color3.new(1,1,1)
+label.TextScaled = true
+wait(3)
+loadingScreen:Destroy()
 
-local Panel = Instance.new("Frame")
-Panel.Name = "Panel"
-Panel.Size = UDim2.new(0, 350, 0, 450)
-Panel.Position = UDim2.new(0.5, -175, 0.5, -225)
-Panel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-Panel.BorderSizePixel = 0
-Panel.Active = true
-Panel.Draggable = true
-Panel.Parent = ScreenGui
+--// GUI: Painel ESP
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "MM2AutoFarmPanel"
+local panel = Instance.new("Frame", gui)
+panel.Position = UDim2.new(0.02,0,0.2,0)
+panel.Size = UDim2.new(0,180,0,140)
+panel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+panel.BorderSizePixel = 0
 
--- Capa Epic Face
-local EpicFace = Instance.new("ImageLabel")
-EpicFace.Name = "EpicFace"
-EpicFace.Size = UDim2.new(0, 128, 0, 128)
-EpicFace.Position = UDim2.new(0.5, -64, 0, 10)
-EpicFace.BackgroundTransparency = 1
-EpicFace.Image = "rbxassetid://10925156039"
-EpicFace.Parent = Panel
+local title = Instance.new("TextLabel", panel)
+title.Text = "MM2 AutoFarm"
+title.Size = UDim2.new(1,0,0,28)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
 
--- Título
-local Title = Instance.new("TextLabel")
-Title.Text = "Redz Hub Style"
-Title.Size = UDim2.new(1, 0, 0, 32)
-Title.Position = UDim2.new(0, 0, 0, 140)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 28
-Title.TextColor3 = Color3.fromRGB(255,255,0)
-Title.Parent = Panel
+local espToggle = Instance.new("TextButton", panel)
+espToggle.Position = UDim2.new(0,10,0,40)
+espToggle.Size = UDim2.new(0,160,0,30)
+espToggle.Text = "Ativar ESP"
+espToggle.Font = Enum.Font.GothamBold
+espToggle.TextSize = 16
+espToggle.BackgroundColor3 = Color3.fromRGB(60,60,80)
+espToggle.TextColor3 = Color3.new(1,1,1)
 
--- Função para criar botões
-function CreateButton(text, y, callback)
-    local Button = Instance.new("TextButton")
-    Button.Text = text
-    Button.Size = UDim2.new(0.8, 0, 0, 32)
-    Button.Position = UDim2.new(0.1, 0, 0, y)
-    Button.BackgroundColor3 = Color3.fromRGB(55,55,55)
-    Button.TextColor3 = Color3.fromRGB(255,255,255)
-    Button.Font = Enum.Font.Gotham
-    Button.TextSize = 20
-    Button.Parent = Panel
-    Button.MouseButton1Click:Connect(callback)
-    return Button
-end
+local espActive = false
 
--- Funções dos botões
-local isESPEnabled = false
-local ESPInstances = {}
+espToggle.MouseButton1Click:Connect(function()
+    espActive = not espActive
+    espToggle.Text = espActive and "Desativar ESP" or "Ativar ESP"
+end)
 
-function EnableESP()
-    isESPEnabled = true
-    for _,plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            local highlight = Instance.new("Highlight")
-            highlight.Name = "ESP"
-            highlight.Adornee = plr.Character
-            highlight.Parent = plr.Character
-            highlight.FillColor = Color3.new(1,1,0)
-            table.insert(ESPInstances, highlight)
-        end
+--// ESP
+local espObjects = {}
+function clearESP()
+    for _,v in pairs(espObjects) do
+        if v.Adornee then v:Destroy() end
     end
+    espObjects = {}
 end
 
-function DisableESP()
-    isESPEnabled = false
-    for _,plr in pairs(Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("ESP") then
-            plr.Character.ESP:Destroy()
-        end
-    end
-    ESPInstances = {}
-end
-
-function Fly()
-    local Humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if not Humanoid then return end
-    local bp = Instance.new("BodyPosition", LocalPlayer.Character.HumanoidRootPart)
-    bp.Name = "FlyBP"
-    bp.MaxForce = Vector3.new(1e5,1e5,1e5)
-    bp.Position = LocalPlayer.Character.HumanoidRootPart.Position
-    local bg = Instance.new("BodyGyro", LocalPlayer.Character.HumanoidRootPart)
-    bg.Name = "FlyBG"
-    bg.MaxTorque = Vector3.new(1e5,1e5,1e5)
-    -- Simples: Pressione W/A/S/D para mover
-    local flying = true
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if flying and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local pos = LocalPlayer.Character.HumanoidRootPart.Position
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                bp.Position = pos + (workspace.CurrentCamera.CFrame.lookVector * 2)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                bp.Position = pos - (workspace.CurrentCamera.CFrame.lookVector * 2)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                bp.Position = pos - (workspace.CurrentCamera.CFrame.rightVector * 2)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                bp.Position = pos + (workspace.CurrentCamera.CFrame.rightVector * 2)
-            end
+function createESP(player, color)
+    pcall(function()
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local bill = Instance.new("BillboardGui", gui)
+            bill.Adornee = player.Character.Head
+            bill.Size = UDim2.new(0,100,0,40)
+            bill.StudsOffset = Vector3.new(0,2,0)
+            bill.AlwaysOnTop = true
+            local txt = Instance.new("TextLabel", bill)
+            txt.Size = UDim2.new(1,0,1,0)
+            txt.BackgroundTransparency = 1
+            txt.Text = player.Name
+            txt.TextColor3 = color
+            txt.Font = Enum.Font.GothamBold
+            txt.TextScaled = true
+            table.insert(espObjects, bill)
         end
     end)
 end
 
-function UnFly()
-    local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if root then
-        if root:FindFirstChild("FlyBP") then root.FlyBP:Destroy() end
-        if root:FindFirstChild("FlyBG") then root.FlyBG:Destroy() end
-    end
-end
-
-function ViewPlayer()
-    local name = game:GetService("StarterGui"):PromptInput("Nome do jogador para View:")
-    local target = Players:FindFirstChild(name)
-    if target and target.Character and target.Character:FindFirstChild("Head") then
-        workspace.CurrentCamera.CameraSubject = target.Character.Head
-    end
-end
-
-function UnView()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
-        workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Head
-    end
-end
-
-function FlingAll()
+--// Função para identificar papéis (Assassino/Xerife)
+function getRoles()
+    local murderer, sheriff = nil, nil
     for _,plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            plr.Character.HumanoidRootPart.Velocity = Vector3.new(500,500,500)
+        if plr.Backpack:FindFirstChild("Knife") or (plr.Character and plr.Character:FindFirstChild("Knife")) then
+            murderer = plr
+        elseif plr.Backpack:FindFirstChild("Gun") or (plr.Character and plr.Character:FindFirstChild("Gun")) then
+            sheriff = plr
         end
     end
+    return murderer, sheriff
 end
 
-function UnFling()
-    for _,plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            plr.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+--// Loop do ESP
+RunService.RenderStepped:Connect(function()
+    if espActive then
+        clearESP()
+        local murderer, sheriff = getRoles()
+        if murderer then createESP(murderer, Color3.fromRGB(255,50,50)) end
+        if sheriff then createESP(sheriff, Color3.fromRGB(50,150,255)) end
+    else
+        clearESP()
+    end
+end)
+
+--// Auto Farm Coin
+coroutine.wrap(function()
+    while wait(0.5) do
+        local coins = Workspace:FindFirstChild("Coins") or Workspace:FindFirstChild("CoinContainer")
+        if coins then
+            for _,coin in pairs(coins:GetChildren()) do
+                if coin:IsA("BasePart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = coin.CFrame + Vector3.new(0,2,0)
+                    wait(0.15)
+                end
+            end
         end
     end
-end
+end)()
 
-function PetDoJogador()
-    local name = game:GetService("StarterGui"):PromptInput("Nome do jogador para virar Pet:")
-    local target = Players:FindFirstChild(name)
-    if target and target.Character and LocalPlayer.Character then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(2,0,0)
-        local weld = Instance.new("WeldConstraint", LocalPlayer.Character.HumanoidRootPart)
-        weld.Part0 = LocalPlayer.Character.HumanoidRootPart
-        weld.Part1 = target.Character.HumanoidRootPart
-        weld.Name = "PetWeld"
+--// Auto Shoot (se for xerife)
+coroutine.wrap(function()
+    while wait(0.2) do
+        local murderer, sheriff = getRoles()
+        if sheriff == LocalPlayer and murderer and murderer.Character and murderer.Character:FindFirstChild("Head") then
+            local gun = LocalPlayer.Backpack:FindFirstChild("Gun") or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Gun"))
+            if gun then
+                -- Mira e atira no assassino
+                local args = {
+                    [1] = murderer.Character.Head.Position
+                }
+                -- Tenta atirar (depende do método do jogo, pode ser diferente)
+                local remote = ReplicatedStorage:FindFirstChild("ShootGun") or ReplicatedStorage.Remotes:FindFirstChild("ShootGun")
+                if remote and remote:IsA("RemoteEvent") then
+                    remote:FireServer(unpack(args))
+                end
+            end
+        end
     end
-end
+end)()
 
-function UnPet()
-    if LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart:FindFirstChild("PetWeld") then
-        LocalPlayer.Character.HumanoidRootPart.PetWeld:Destroy()
-    end
-end
+--// Hotkey para fechar painel
+panel.Active = true
+panel.Draggable = true
+local closeBtn = Instance.new("TextButton", panel)
+closeBtn.Position = UDim2.new(0,150,0,0)
+closeBtn.Size = UDim2.new(0,28,0,28)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.new(1,0.3,0.3)
+closeBtn.TextSize = 16
+closeBtn.BackgroundTransparency = 1
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
 
--- Botões
-local y = 180
-CreateButton("ESP", y, EnableESP)
-y = y + 40
-CreateButton("UnESP", y, DisableESP)
-y = y + 40
-CreateButton("Fly", y, Fly)
-y = y + 40
-CreateButton("UnFly", y, UnFly)
-y = y + 40
-CreateButton("View Jogador", y, ViewPlayer)
-y = y + 40
-CreateButton("UnView", y, UnView)
-y = y + 40
-CreateButton("Fling All", y, FlingAll)
-y = y + 40
-CreateButton("UnFling", y, UnFling)
-y = y + 40
-CreateButton("Vira Pet do Jogador", y, PetDoJogador)
-y = y + 40
-CreateButton("Desvirar Pet", y, UnPet)
-
--- Resize Panel
-local ResizeBtn = Instance.new("TextButton")
-ResizeBtn.Text = "⬍"
-ResizeBtn.Size = UDim2.new(0, 36, 0, 36)
-ResizeBtn.Position = UDim2.new(1, -40, 1, -40)
-ResizeBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-ResizeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+-- FIMResizeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 ResizeBtn.Font = Enum.Font.GothamBold
 ResizeBtn.TextSize = 22
 ResizeBtn.Parent = Panel
