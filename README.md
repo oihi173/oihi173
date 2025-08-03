@@ -1,268 +1,267 @@
-local gui = Instance.new("ScreenGui")
-gui.Name = "PainelMM2"
-gui.ResetOnSpawn = false
-gui.Parent = game.CoreGui
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
-local welcomeFrame = Instance.new("Frame", gui)
-welcomeFrame.Size = UDim2.new(0, 400, 0, 120)
-welcomeFrame.Position = UDim2.new(0.5, -200, 0.5, -60)
-welcomeFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-welcomeFrame.BorderSizePixel = 0
-
-local welcomeText = Instance.new("TextLabel", welcomeFrame)
-welcomeText.Size = UDim2.new(1, 0, 1, 0)
-welcomeText.BackgroundTransparency = 1
-welcomeText.Text = "Bem-vindo\nScripts tst"
-welcomeText.TextColor3 = Color3.fromRGB(255,255,255)
-welcomeText.Font = Enum.Font.SourceSansBold
-welcomeText.TextScaled = true
-
-wait(7)
-welcomeFrame:Destroy()
-
--- // FUNÇÃO DRAG (PAINEL MÓVEL)
-local function dragify(Frame)
-    local dragging, dragInput, dragStart, startPos
-    Frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = Frame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then dragging = false end
-            end)
-        end
-    end)
-    Frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
+-- Função para criar GUI
+local function CreateGuiElement(class, props)
+    local obj = Instance.new(class)
+    for k, v in pairs(props or {}) do
+        obj[k] = v
+    end
+    return obj
 end
 
--- // PAINEL PRINCIPAL
-local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0, 340, 0, 340)
-mainFrame.Position = UDim2.new(0.5, -170, 0.5, -170)
-mainFrame.BackgroundColor3 = Color3.fromRGB(27,27,27)
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = true
+-- Remove GUIs antigos para evitar duplicatas
+pcall(function() if LocalPlayer.PlayerGui:FindFirstChild("TrollFacePanel") then LocalPlayer.PlayerGui.TrollFacePanel:Destroy() end end)
 
-dragify(mainFrame)
+-- Tela de carregamento
+local screenGui = CreateGuiElement("ScreenGui", {Name = "TrollFacePanel", ResetOnSpawn = false, Parent = LocalPlayer:WaitForChild("PlayerGui")})
+local loadingFrame = CreateGuiElement("Frame", {
+    Parent = screenGui,
+    Size = UDim2.new(0, 400, 0, 300),
+    Position = UDim2.new(0.5, -200, 0.5, -150),
+    BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+    BorderSizePixel = 0,
+    Visible = true,
+})
+local trollFace = CreateGuiElement("ImageLabel", {
+    Parent = loadingFrame,
+    Size = UDim2.new(0, 100, 0, 100),
+    Position = UDim2.new(0.5, -50, 0, 10),
+    BackgroundTransparency = 1,
+    Image = "http://www.roblox.com/asset/?id=518009006", -- Troll face asset
+})
+local title = CreateGuiElement("TextLabel", {
+    Parent = loadingFrame,
+    Size = UDim2.new(1, 0, 0, 30),
+    Position = UDim2.new(0, 0, 0, 120),
+    BackgroundTransparency = 1,
+    Text = "Troll Face by oihi_173",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    Font = Enum.Font.FredokaOne,
+    TextSize = 28,
+})
+local countLabel = CreateGuiElement("TextLabel", {
+    Parent = loadingFrame,
+    Size = UDim2.new(1, 0, 0, 60),
+    Position = UDim2.new(0, 0, 0, 160),
+    BackgroundTransparency = 1,
+    Text = "Carregando...",
+    TextColor3 = Color3.fromRGB(255,255,0),
+    Font = Enum.Font.FredokaOne,
+    TextSize = 36,
+})
 
--- // BOTÃO FECHAR/ABRIR
-local openBtn = Instance.new("TextButton", gui)
-openBtn.Size = UDim2.new(0, 80, 0, 35)
-openBtn.Position = UDim2.new(0, 10, 0.5, -20)
-openBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-openBtn.Text = "Abrir Painel"
-openBtn.TextColor3 = Color3.fromRGB(255,255,255)
-openBtn.Visible = false
-
-local closeBtn = Instance.new("TextButton", mainFrame)
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(80,0,0)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
-
-closeBtn.MouseButton1Click:Connect(function()
-    mainFrame.Visible = false
-    openBtn.Visible = true
-end)
-openBtn.MouseButton1Click:Connect(function()
-    mainFrame.Visible = true
-    openBtn.Visible = false
-end)
-
--- // TÍTULO E CRÉDITO
-local titulo = Instance.new("TextLabel", mainFrame)
-titulo.Size = UDim2.new(1, 0, 0, 36)
-titulo.Position = UDim2.new(0, 0, 0, 0)
-titulo.BackgroundTransparency = 1
-titulo.Text = "Painel MM2 | by oihi_173"
-titulo.Font = Enum.Font.SourceSansBold
-titulo.TextSize = 22
-titulo.TextColor3 = Color3.fromRGB(0,255,127)
-
--- // CRIAÇÃO DAS OPÇÕES
-local function criarBotao(txt, ordem)
-    local btn = Instance.new("TextButton", mainFrame)
-    btn.Size = UDim2.new(1, -40, 0, 36)
-    btn.Position = UDim2.new(0, 20, 0, 50 + (ordem-1)*44)
-    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    btn.Text = txt
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 19
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Name = txt:gsub(" ", "")
-    return btn
+-- Tela de carregamento animada (1 a 7)
+for i = 1, 7 do
+    countLabel.Text = "Carregando... " .. tostring(i)
+    wait(1)
 end
 
-local autoFarmBtn = criarBotao("Auto Farm", 1)
-local unautoFarmBtn = criarBotao("UnAuto Farm", 2)
-local autoShotBtn = criarBotao("Auto Shot Murder", 3)
-local espAssassinBtn = criarBotao("ESP Assassino/Xerife", 4)
-local espInocenteBtn = criarBotao("ESP Inocente", 5)
-local farmFuncBtn = criarBotao("Farm Funcional (Ir até moedas)", 6)
+loadingFrame.Visible = false
 
--- // FUNÇÕES CORE
-local autoFarmAtivo = false
-local noclipCon = nil
+-- Painel principal
+local mainFrame = CreateGuiElement("Frame", {
+    Parent = screenGui,
+    Size = UDim2.new(0, 410, 0, 350),
+    Position = UDim2.new(0.5, -205, 0.5, -175),
+    BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+    BorderSizePixel = 5,
+    BorderColor3 = Color3.fromRGB(255,255,0),
+    Visible = true,
+})
+local trollFace2 = trollFace:Clone()
+trollFace2.Parent = mainFrame
+trollFace2.Position = UDim2.new(0.5, -50, 0, 10)
+local title2 = title:Clone()
+title2.Parent = mainFrame
+title2.Position = UDim2.new(0, 0, 0, 120)
 
-function ativarNoclip()
-    if noclipCon then noclipCon:Disconnect() end
-    noclipCon = game:GetService("RunService").Stepped:Connect(function()
-        pcall(function()
-            local char = game.Players.LocalPlayer.Character
-            if char then
-                for _,v in pairs(char:GetDescendants()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
-                end
+-- Botões
+local options = {
+    {Name="Auto Farm", Key="autofarm"}, 
+    {Name="Auto Shot", Key="autoshoot"},
+    {Name="ESP Xerife", Key="esp_sheriff"},
+    {Name="ESP Assassino", Key="esp_murder"},
+    {Name="ESP Inocente", Key="esp_innocent"},
+    {Name="Desativar ESP", Key="esp_off"},
+}
+local states = {
+    autofarm = false,
+    autoshoot = false,
+    esp_sheriff = false,
+    esp_murder = false,
+    esp_innocent = false
+}
+
+local y = 170
+for i, opt in ipairs(options) do
+    local btn = CreateGuiElement("TextButton", {
+        Parent = mainFrame,
+        Size = UDim2.new(0, 250, 0, 35),
+        Position = UDim2.new(0.5,-125,0, y),
+        BackgroundColor3 = Color3.fromRGB(60,60,60),
+        Text = opt.Name,
+        TextColor3 = Color3.fromRGB(255,255,255),
+        Font = Enum.Font.FredokaOne,
+        TextSize = 22,
+        Name = opt.Key,
+        BorderSizePixel = 2,
+        BorderColor3 = Color3.fromRGB(255,255,0),
+    })
+    btn.MouseButton1Click:Connect(function()
+        if opt.Key == "esp_off" then
+            states.esp_sheriff = false
+            states.esp_murder = false
+            states.esp_innocent = false
+            RemoveAllESP()
+        elseif opt.Key == "autofarm" then
+            states.autofarm = not states.autofarm
+            btn.BackgroundColor3 = states.autofarm and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60,60,60)
+        elseif opt.Key == "autoshoot" then
+            states.autoshoot = not states.autoshoot
+            btn.BackgroundColor3 = states.autoshoot and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60,60,60)
+        else
+            local key = opt.Key
+            states[key] = not states[key]
+            btn.BackgroundColor3 = states[key] and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60,60,60)
+        end
+    end)
+    y = y + 40
+end
+
+-- Música após 7 segundos
+local function PlayMusic()
+    local sound = Instance.new("Sound", mainFrame)
+    sound.SoundId = "rbxassetid://1843525033" -- Meme song: "Troll Song"
+    sound.Volume = 1
+    sound.Looped = true
+    wait(0.2)
+    sound:Play()
+end
+spawn(function()
+    wait(7)
+    PlayMusic()
+end)
+
+-- ESP
+local espObjects = {}
+
+function RemoveAllESP()
+    for _,v in pairs(espObjects) do
+        if v and v.Adornee and v.Parent then v:Destroy() end
+    end
+    espObjects = {}
+end
+
+function AddESP(player, color)
+    if player == LocalPlayer then return end
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local box = Instance.new("BillboardGui", mainFrame)
+    box.Adornee = char.HumanoidRootPart
+    box.AlwaysOnTop = true
+    box.Size = UDim2.new(0,50,0,20)
+    local txt = Instance.new("TextLabel", box)
+    txt.Size = UDim2.new(1,0,1,0)
+    txt.BackgroundTransparency = 1
+    txt.Text = player.DisplayName or player.Name
+    txt.TextColor3 = color
+    txt.Font = Enum.Font.FredokaOne
+    txt.TextStrokeTransparency = 0.5
+    txt.TextSize = 16
+    table.insert(espObjects, box)
+end
+
+-- Detecção de papéis
+local function GetRole(p)
+    local backpack = p:FindFirstChild("Backpack") or p:FindFirstChildOfClass("Backpack")
+    if backpack then
+        if backpack:FindFirstChild("Knife") then return "Assassino" end
+        if backpack:FindFirstChild("Gun") then return "Xerife" end
+    end
+    local char = p.Character
+    if char then
+        if char:FindFirstChild("Knife") then return "Assassino" end
+        if char:FindFirstChild("Gun") then return "Xerife" end
+    end
+    return "Inocente"
+end
+
+-- Loop ESP
+spawn(function()
+    while true do
+        RemoveAllESP()
+        for _,p in pairs(Players:GetPlayers()) do
+            local role = GetRole(p)
+            if states.esp_murder and role == "Assassino" then AddESP(p, Color3.new(1,0,0)) end
+            if states.esp_sheriff and role == "Xerife" then AddESP(p, Color3.new(0,0,1)) end
+            if states.esp_innocent and role == "Inocente" then AddESP(p, Color3.new(0,1,0)) end
+        end
+        wait(0.5)
+    end
+end)
+
+-- Auto Farm: Noclip + voar até moeda
+local function Noclip()
+    local char = LocalPlayer.Character
+    if char then
+        for _,v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
             end
-        end)
-    end)
-end
-function desativarNoclip()
-    if noclipCon then noclipCon:Disconnect() end
+        end
+    end
 end
 
-function autoFarm()
-    autoFarmAtivo = true
-    ativarNoclip()
-    while autoFarmAtivo and wait(0.5) do
-        local char = game.Players.LocalPlayer.Character
-        if not char then continue end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
-        -- Coletar moedas (bolas amarelas)
-        for _,obj in pairs(workspace:GetChildren()) do
-            if obj.Name == "CoinContainer" or obj.Name == "Coin" then
-                for _,coin in pairs(obj:GetChildren()) do
-                    if coin:IsA("BasePart") then
-                        hrp.CFrame = coin.CFrame + Vector3.new(0,2,0)
-                        wait(0.1)
+local function GetNearestCoin()
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
+    local pos = char.HumanoidRootPart.Position
+    local nearest, dist = nil, math.huge
+    for _,v in pairs(workspace:GetDescendants()) do
+        if v.Name == "Coin" and v:IsA("BasePart") and v.Transparency < 1 then
+            local d = (v.Position - pos).magnitude
+            if d < dist then
+                nearest = v
+                dist = d
+            end
+        end
+    end
+    return nearest
+end
+
+spawn(function()
+    while true do
+        if states.autofarm then
+            Noclip()
+            local char = LocalPlayer.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            local coin = GetNearestCoin()
+            if root and coin then
+                -- Voa para moeda
+                root.CFrame = root.CFrame:Lerp(CFrame.new(coin.Position + Vector3.new(0,3,0)), 0.25)
+            end
+        end
+        wait(0.1)
+    end
+end)
+
+-- Auto Shot (exemplo básico)
+spawn(function()
+    while true do
+        if states.autoshoot then
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("Gun") then
+                for _,p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and GetRole(p) == "Assassino" then
+                        -- Tenta mirar e atirar (depende do executor e API)
+                        -- Exemplo: char.Gun:FireServer(p.Character.HumanoidRootPart.Position)
                     end
                 end
             end
         end
-    end
-    desativarNoclip()
-end
-
-function unAutoFarm()
-    autoFarmAtivo = false
-    desativarNoclip()
-end
-
-autoFarmBtn.MouseButton1Click:Connect(function()
-    if not autoFarmAtivo then
-        spawn(autoFarm)
+        wait(0.4)
     end
 end)
-unautoFarmBtn.MouseButton1Click:Connect(unAutoFarm)
-
-farmFuncBtn.MouseButton1Click:Connect(function()
-    -- Mesma lógica do autoFarm, mas pode ser expandida para só coletar moedas
-    if not autoFarmAtivo then
-        spawn(autoFarm)
-    end
-end)
-
--- // ESP FUNÇÕES
-local highlightFolder = Instance.new("Folder", gui)
-highlightFolder.Name = "ESPFolder"
-
-function limparESP()
-    for _,v in pairs(highlightFolder:GetChildren()) do v:Destroy() end
-end
-
-function criarESP(cor, player)
-    pcall(function()
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hl = Instance.new("Highlight", highlightFolder)
-            hl.Adornee = player.Character
-            hl.FillColor = cor
-            hl.OutlineColor = Color3.fromRGB(0,0,0)
-            hl.FillTransparency = 0.5
-            hl.OutlineTransparency = 0
-            hl.Name = player.Name .. "_ESP"
-        end
-    end)
-end
-
-espAssassinBtn.MouseButton1Click:Connect(function()
-    limparESP()
-    for _,p in pairs(game.Players:GetPlayers()) do
-        if p ~= game.Players.LocalPlayer and p.Character then
-            local tool = p.Backpack:FindFirstChild("Knife") or (p.Character:FindFirstChildOfClass("Tool") and p.Character:FindFirstChildOfClass("Tool").Name == "Knife")
-            local sheriff = p.Backpack:FindFirstChild("Gun") or (p.Character:FindFirstChildOfClass("Tool") and p.Character:FindFirstChildOfClass("Tool").Name == "Gun")
-            if tool then
-                criarESP(Color3.fromRGB(255,0,0), p) -- Assassino
-            elseif sheriff then
-                criarESP(Color3.fromRGB(0,0,255), p) -- Xerife
-            end
-        end
-    end
-end)
-
-espInocenteBtn.MouseButton1Click:Connect(function()
-    limparESP()
-    for _,p in pairs(game.Players:GetPlayers()) do
-        if p ~= game.Players.LocalPlayer and p.Character then
-            local tool = p.Backpack:FindFirstChild("Knife") or (p.Character:FindFirstChildOfClass("Tool") and p.Character:FindFirstChildOfClass("Tool").Name == "Knife")
-            local sheriff = p.Backpack:FindFirstChild("Gun") or (p.Character:FindFirstChildOfClass("Tool") and p.Character:FindFirstChildOfClass("Tool").Name == "Gun")
-            if not tool and not sheriff then
-                criarESP(Color3.fromRGB(0,255,0), p) -- Inocente
-            end
-        end
-    end
-end)
-
-autoShotBtn.MouseButton1Click:Connect(function()
-    -- Tenta atirar automaticamente no assassino se for xerife
-    local lp = game.Players.LocalPlayer
-    local char = lp.Character
-    if not char then return end
-    local tool = char:FindFirstChildOfClass("Tool")
-    if tool and tool.Name == "Gun" then
-        for _,p in pairs(game.Players:GetPlayers()) do
-            if p ~= lp then
-                local isMurder = p.Backpack:FindFirstChild("Knife") or (p.Character and p.Character:FindFirstChildOfClass("Tool") and p.Character:FindFirstChildOfClass("Tool").Name == "Knife")
-                if isMurder and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    -- Mirar e atirar
-                    char.HumanoidRootPart.CFrame = CFrame.new(char.HumanoidRootPart.Position, p.Character.HumanoidRootPart.Position)
-                    tool:Activate()
-                end
-            end
-        end
-    end
-end)
-
--- // HOTKEY PARA ABRIR/FECHAR (tecla: F)
-game:GetService("UserInputService").InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == Enum.KeyCode.F then
-        mainFrame.Visible = not mainFrame.Visible
-        openBtn.Visible = not mainFrame.Visible
-    end
-end)
-
--- // ATUALIZAÇÃO DINÂMICA DO ESP (a cada 3s)
-spawn(function()
-    while true do
-        wait(3)
-        if highlightFolder:FindFirstChildWhichIsA("Highlight") then
-            -- Atualiza ESP caso players mudem de personagem
-            for _,hl in pairs(highlightFolder:GetChildren()) do
-                if hl:IsA("Highlight") then
-                    local pName = hl.Name:gsub("_ESP","")
-                    local p = game.Players:FindFirstChild(pName)
-                    if p and p.Character then
-                        hl
-                        
