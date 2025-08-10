@@ -1,160 +1,167 @@
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 
--- Painel UI
+-- Criação do painel UI
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "DeadRailsESP"
-screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.Name = "ESPPanel"
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 250, 0, 120)
-panel.Position = UDim2.new(0, 50, 0, 50)
-panel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-panel.BorderColor3 = Color3.fromRGB(255, 221, 0)
-panel.BorderSizePixel = 2
-panel.Active = true
-panel.Draggable = true -- Mover painel
+panel.Size = UDim2.new(0, 320, 0, 160)
+panel.Position = UDim2.new(0, 40, 0, 40)
+panel.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+panel.BorderSizePixel = 0
+panel.Visible = true
+panel.Active = true -- permite drag
+panel.Draggable = false -- custom drag para só horizontal
 panel.Parent = screenGui
 
-local header = Instance.new("TextLabel")
-header.Size = UDim2.new(1, 0, 0, 30)
-header.BackgroundTransparency = 1
-header.Text = "Painel ESP Dead Rails"
-header.TextColor3 = Color3.fromRGB(255, 221, 0)
-header.Font = Enum.Font.SourceSansBold
-header.TextSize = 20
-header.Parent = panel
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 32)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Text = "Painel ESP Unesp"
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+title.TextSize = 20
+title.Parent = panel
 
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 0)
-closeBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255, 221, 0)
-closeBtn.Font = Enum.Font.SourceSansBold
-closeBtn.TextSize = 20
-closeBtn.Parent = panel
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 80, 0, 28)
+toggleBtn.Position = UDim2.new(1, -90, 0, 8)
+toggleBtn.Text = "Fechar"
+toggleBtn.Font = Enum.Font.GothamSemibold
+toggleBtn.TextSize = 15
+toggleBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+toggleBtn.Parent = panel
 
-local openBtn = Instance.new("TextButton")
-openBtn.Size = UDim2.new(0, 120, 0, 30)
-openBtn.Position = UDim2.new(0, 50, 0, 10)
-openBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-openBtn.Text = "Abrir Painel ESP"
-openBtn.TextColor3 = Color3.fromRGB(255, 221, 0)
-openBtn.Font = Enum.Font.SourceSansBold
-openBtn.TextSize = 16
-openBtn.Visible = false
-openBtn.Parent = screenGui
+local msgLabel = Instance.new("TextLabel")
+msgLabel.Size = UDim2.new(1, -20, 0, 32)
+msgLabel.Position = UDim2.new(0, 10, 0, 38)
+msgLabel.Text = ""
+msgLabel.Font = Enum.Font.GothamSemibold
+msgLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
+msgLabel.BackgroundTransparency = 1
+msgLabel.TextSize = 15
+msgLabel.Parent = panel
 
-closeBtn.MouseButton1Click:Connect(function()
-    panel.Visible = false
-    openBtn.Visible = true
-end)
-
-openBtn.MouseButton1Click:Connect(function()
-    panel.Visible = true
-    openBtn.Visible = false
-end)
+local espStatus = Instance.new("TextLabel")
+espStatus.Size = UDim2.new(1, -20, 0, 24)
+espStatus.Position = UDim2.new(0, 10, 0, 70)
+espStatus.Text = "ESP: Desativado"
+espStatus.Font = Enum.Font.Gotham
+espStatus.TextColor3 = Color3.fromRGB(255,255,0)
+espStatus.BackgroundTransparency = 1
+espStatus.TextSize = 14
+espStatus.Parent = panel
 
 local espBtn = Instance.new("TextButton")
-espBtn.Size = UDim2.new(0, 120, 0, 30)
-espBtn.Position = UDim2.new(0, 10, 0, 40)
-espBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-espBtn.Text = "Ativar ESP"
-espBtn.TextColor3 = Color3.fromRGB(255, 221, 0)
-espBtn.Font = Enum.Font.SourceSansBold
-espBtn.TextSize = 16
+espBtn.Size = UDim2.new(0, 120, 0, 28)
+espBtn.Position = UDim2.new(0, 10, 0, 100)
+espBtn.Text = "Ativar ESP Unesp"
+espBtn.Font = Enum.Font.GothamSemibold
+espBtn.TextSize = 15
+espBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+espBtn.TextColor3 = Color3.fromRGB(255,255,255)
 espBtn.Parent = panel
 
-local unespBtn = Instance.new("TextButton")
-unespBtn.Size = UDim2.new(0, 80, 0, 30)
-unespBtn.Position = UDim2.new(0, 140, 0, 40)
-unespBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-unespBtn.Text = "UnESP"
-unespBtn.TextColor3 = Color3.fromRGB(255, 221, 0)
-unespBtn.Font = Enum.Font.SourceSansBold
-unespBtn.TextSize = 16
-unespBtn.Parent = panel
+-- Arrastar o painel lateralmente
+local dragging = false
+local dragStart = nil
+local panelStart = nil
 
-local info = Instance.new("TextLabel")
-info.Size = UDim2.new(1, -20, 0, 30)
-info.Position = UDim2.new(0, 10, 0, 80)
-info.BackgroundTransparency = 1
-info.Text = "ESP: Só linha amarela na hitbox dos zumbis"
-info.TextColor3 = Color3.fromRGB(255, 221, 0)
-info.Font = Enum.Font.SourceSans
-info.TextSize = 13
-info.Parent = panel
-
--- Função ESP
-local adornments = {}
-local espActive = false
-
-function clearESP()
-    for _, ad in ipairs(adornments) do
-        ad:Destroy()
+panel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        panelStart = panel.Position
     end
-    adornments = {}
+end)
+panel.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        -- Só mover X (horizontal)
+        panel.Position = UDim2.new(panelStart.X.Scale, panelStart.X.Offset + delta.X, panelStart.Y.Scale, panelStart.Y.Offset)
+    end
+end)
+
+-- Abrir/Fechar painel
+toggleBtn.MouseButton1Click:Connect(function()
+    panel.Visible = not panel.Visible
+    if panel.Visible then
+        toggleBtn.Text = "Fechar"
+    else
+        toggleBtn.Text = "Abrir"
+    end
+end)
+
+-- Mensagem animada ao ativar
+local function animateMsg(txt)
+    msgLabel.Text = ""
+    for i = 1, #txt do
+        msgLabel.Text = string.sub(txt, 1, i)
+        wait(0.03)
+    end
 end
 
-function updateESP()
-    clearESP()
-    if not espActive then return end
-    local zombiesFolder = workspace:FindFirstChild("Zombies")
-    if not zombiesFolder then return end
+-- ESP Quadrado
+local espActive = false
+local boxAdorns = {}
 
-    for _, zombie in ipairs(zombiesFolder:GetChildren()) do
-        if zombie:IsA("Model") then
-            local part = zombie:FindFirstChild("HumanoidRootPart") or zombie:FindFirstChildWhichIsA("BasePart")
-            if part then
-                local box = Instance.new("BoxHandleAdornment")
-                box.Size = part.Size
-                box.Adornee = part
-                box.Parent = part
-                box.Color3 = Color3.fromRGB(255, 221, 0)
-                box.Transparency = 0
-                box.ZIndex = 10
-                box.AlwaysOnTop = true
-                box.Visible = true
-                box.LineThickness = 2
-                box.Name = "DeadRailsESPBox"
-                box.Style = Enum.BoxHandleAdornmentStyle.Wireframe
-                table.insert(adornments, box)
-            end
+local function clearESP()
+    for _, adorn in pairs(boxAdorns) do
+        adorn:Destroy()
+    end
+    boxAdorns = {}
+end
+
+local function updateESP()
+    clearESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local root = player.Character.HumanoidRootPart
+            local box = Instance.new("BoxHandleAdornment")
+            box.Adornee = root
+            box.Size = Vector3.new(4, 7, 2) -- Tamanho hitbox padrão
+            box.Color3 = Color3.fromRGB(0, 255, 0)
+            box.Transparency = 0.5
+            box.ZIndex = 10
+            box.AlwaysOnTop = true
+            box.Parent = root
+            table.insert(boxAdorns, box)
         end
     end
 end
 
-espBtn.MouseButton1Click:Connect(function()
-    espActive = not espActive
-    espBtn.Text = espActive and "Desativar ESP" or "Ativar ESP"
-    updateESP()
-end)
-
-unespBtn.MouseButton1Click:Connect(function()
-    espActive = false
-    espBtn.Text = "Ativar ESP"
-    clearESP()
-end)
-
--- Atualiza ESP quando zumbis aparecerem/desaparecerem
-workspace.ChildAdded:Connect(function(child)
-    if child.Name == "Zombies" then
+-- Loop de ESP
+RunService.RenderStepped:Connect(function()
+    if espActive then
         updateESP()
-        child.ChildAdded:Connect(function() updateESP() end)
-        child.ChildRemoved:Connect(function() updateESP() end)
+    else
+        clearESP()
     end
 end)
 
-local zombiesFolder = workspace:FindFirstChild("Zombies")
-if zombiesFolder then
-    zombiesFolder.ChildAdded:Connect(function() updateESP() end)
-    zombiesFolder.ChildRemoved:Connect(function() updateESP() end)
-end
-
--- Para garantir que sempre limpa ao fechar painel
-panel:GetPropertyChangedSignal("Visible"):Connect(function()
-    if not panel.Visible then
+espBtn.MouseButton1Click:Connect(function()
+    espActive = not espActive
+    if espActive then
+        espStatus.Text = "ESP: Ativado"
+        espStatus.TextColor3 = Color3.fromRGB(0,255,0)
+        espBtn.Text = "Desativar ESP"
+        animateMsg("este *script foi feito e alguns coisas que eu tive pensando*")
+    else
+        espStatus.Text = "ESP: Desativado"
+        espStatus.TextColor3 = Color3.fromRGB(255,255,0)
+        espBtn.Text = "Ativar ESP Unesp"
+        msgLabel.Text = ""
         clearESP()
     end
 end)
