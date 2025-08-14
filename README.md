@@ -1,20 +1,63 @@
 local player = game.Players.LocalPlayer
-local backpack = player:WaitForChild("Backpack")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local runService = game:GetService("RunService")
+local workspace = game:GetService("Workspace")
 
-for _, item in pairs(backpack:GetChildren()) do
-    if item:IsA("Tool") then
-        item.Parent = player.Character
+-- Parâmetros da IA
+local moveSpeed = 16
+local searchRadius = 30
+
+-- Função para encontrar o item mais próximo
+local function findNearestItem()
+    local nearestItem = nil
+    local shortestDistance = searchRadius
+    for _, item in ipairs(workspace:GetChildren()) do
+        if item:IsA("Tool") and item.Parent == workspace then
+            local distance = (rootPart.Position - item.Position).Magnitude
+            if distance < shortestDistance then
+                nearestItem = item
+                shortestDistance = distance
+            end
+        end
     end
-endgame.Replicalocal player = game.Players.LocalPlayer
-local character = player.Character
-local tool = character:FindFirstChildOfClass("Tool") -- faca ou arma
+    return nearestItem
+end
 
-for _, target in pairs(game.Players:GetPlayers()) do
-    if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        local targetPart = target.Character.HumanoidRootPart
-        tool:Activate() -- Tenta usar a arma (pode variar conforme o jogo)
-        -- Aproxima do alvo
-        character.HumanoidRootPart.CFrame = targetPart.CFrame
+-- Função para mover até uma posição
+local function moveTo(targetPosition)
+    humanoid:MoveTo(targetPosition)
+    humanoid.MoveToFinished:Wait()
+end
+
+-- Função para explorar uma área aleatória
+local function exploreRandomly()
+    local randomPosition = rootPart.Position + Vector3.new(
+        math.random(-searchRadius, searchRadius),
+        0,
+        math.random(-searchRadius, searchRadius)
+    )
+    moveTo(randomPosition)
+end
+
+-- Função para pegar item
+local function pickUpItem(item)
+    if item and (rootPart.Position - item.Position).Magnitude < 5 then
+        item.Parent = character
+    end
+end
+
+-- Loop principal da IA
+spawn(function()
+    while true do
+        local item = findNearestItem()
+        if item then
+            moveTo(item.Position)
+            pickUpItem(item)
+        else
+            exploreRandomly()
+        end
         wait(1)
     end
-endtedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Olá, estou andando pelo mapa!", "All")
+end)
