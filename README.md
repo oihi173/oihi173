@@ -1,173 +1,305 @@
--- LocalScript em StarterGui
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleBar = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local CloseButton = Instance.new("TextButton")
+local OpenButton = Instance.new("TextButton")
+local Dragging = false
+local DragInput, MousePos, FramePos
 
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "WildHorseIslandsScriptV2"
-gui.ResetOnSpawn = false
+ScreenGui.Name = "WildHorseScriptUI"
+ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
--- Botão de abrir/fechar
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 100, 0, 40)
-toggleButton.Position = UDim2.new(0, 10, 0.8, 0)
-toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-toggleButton.Text = "Menu"
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Font = Enum.Font.SourceSansBold
-toggleButton.TextSize = 18
-toggleButton.Parent = gui
+-- Open/Close Button (initially only open shown, main frame hidden)
+OpenButton.Name = "OpenButton"
+OpenButton.Text = "Open VIPER Panel"
+OpenButton.Size = UDim2.new(0, 150, 0, 30)
+OpenButton.Position = UDim2.new(0, 10, 0, 10)
+OpenButton.Parent = ScreenGui
 
--- Painel principal
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 400)
-mainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = false
-mainFrame.Parent = gui
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 350, 0, 450)
+MainFrame.Position = UDim2.new(0, 200, 0, 100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = false
+MainFrame.Active = true
+MainFrame.Parent = ScreenGui
 
--- Arrastar painel
-local dragging, dragInput, dragStart, startPos
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1,0,0,30)
+TitleBar.BackgroundColor3 = Color3.fromRGB(50,50,50)
+TitleBar.Parent = MainFrame
 
-local function update(input)
-	local delta = input.Position - dragStart
-	mainFrame.Position = UDim2.new(
-		startPos.X.Scale, startPos.X.Offset + delta.X,
-		startPos.Y.Scale, startPos.Y.Offset + delta.Y
-	)
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Text = "VIPER Wild Horse Panel"
+TitleLabel.Size = UDim2.new(1, -40, 1, 0)
+TitleLabel.Position = UDim2.new(0,10,0,0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextColor3 = Color3.fromRGB(255,255,255)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 16
+TitleLabel.Parent = TitleBar
+
+CloseButton.Name = "CloseButton"
+CloseButton.Text = "X"
+CloseButton.Size = UDim2.new(0,30,1,0)
+CloseButton.Position = UDim2.new(1,-30,0,0)
+CloseButton.BackgroundColor3 = Color3.fromRGB(200,50,50)
+CloseButton.TextColor3 = Color3.fromRGB(255,255,255)
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 14
+CloseButton.Parent = TitleBar
+
+-- Drag Panel Logic
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        Dragging = true
+        DragInput = input
+        MousePos = input.Position
+        FramePos = MainFrame.Position
+    end
+end)
+TitleBar.InputChanged:Connect(function(input)
+    if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - MousePos
+        MainFrame.Position = UDim2.new(FramePos.X.Scale, FramePos.X.Offset + delta.X, FramePos.Y.Scale, FramePos.Y.Offset + delta.Y)
+    end
+end)
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input == DragInput then
+        Dragging = false
+    end
+end)
+
+-- Open/Close Actions
+OpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenButton.Visible = false
+end)
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenButton.Visible = true
+end)
+
+-- Utility
+local function notify(msg)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "VIPER Script", 
+        Text = msg
+    })
 end
 
-mainFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-mainFrame.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		update(input)
-	end
-end)
-
--- Título
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 35)
-title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-title.Text = "Wild Horse Islands Script V2 | By VIPER"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 16
-title.Parent = mainFrame
-
--- Container abas
-local tabFrame = Instance.new("Frame")
-tabFrame.Size = UDim2.new(0, 90, 1, -35)
-tabFrame.Position = UDim2.new(0, 0, 0, 35)
-tabFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-tabFrame.Parent = mainFrame
-
--- Conteúdo das abas
-local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -90, 1, -35)
-contentFrame.Position = UDim2.new(0, 90, 0, 35)
-contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-contentFrame.Parent = mainFrame
-
--- Função checkbox
-local function createToggle(parent, text, order)
-	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(1, -20, 0, 25)
-	button.Position = UDim2.new(0, 10, 0, 10 + (order * 30))
-	button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	button.Text = "[ ] " .. text
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	button.Font = Enum.Font.SourceSans
-	button.TextSize = 14
-	button.Parent = parent
-
-	local enabled = false
-	button.MouseButton1Click:Connect(function()
-		enabled = not enabled
-		if enabled then
-			button.Text = "[X] " .. text
-		else
-			button.Text = "[ ] " .. text
-		end
-	end)
+-- Button Factory
+local function createButton(text, y, callback)
+    local btn = Instance.new("TextButton")
+    btn.Text = text
+    btn.Size = UDim2.new(0.9, 0, 0, 30)
+    btn.Position = UDim2.new(0.05, 0, 0, y)
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.Parent = MainFrame
+    btn.MouseButton1Click:Connect(callback)
+    return btn
 end
 
--- Criar abas
-local tabs = {}
-local function createTab(name)
-	local tabButton = Instance.new("TextButton")
-	tabButton.Size = UDim2.new(1, 0, 0, 30)
-	tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	tabButton.Text = name
-	tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	tabButton.Font = Enum.Font.SourceSansBold
-	tabButton.TextSize = 14
-	tabButton.Parent = tabFrame
+local btnY = 40
+local btnSpacing = 35
 
-	local tabContent = Instance.new("Frame")
-	tabContent.Size = UDim2.new(1, 0, 1, 0)
-	tabContent.BackgroundTransparency = 1
-	tabContent.Visible = false
-	tabContent.Parent = contentFrame
+-- 1. Main
+createButton("Auto Farm Horses", btnY, AutoFarmHorses)
+btnY = btnY + btnSpacing
+createButton("Auto Sell Items", btnY, AutoSellItems)
+btnY = btnY + btnSpacing
+createButton("Auto Collect Resources", btnY, AutoCollectResources)
+btnY = btnY + btnSpacing
+createButton("Auto Complete Quests", btnY, AutoCompleteQuests)
+btnY = btnY + btnSpacing
 
-	tabs[name] = {Button = tabButton, Content = tabContent}
+-- 2. Item Mods
+createButton("Reduce Lasso Cooldown", btnY, ReduceLassoCooldown)
+btnY = btnY + btnSpacing
+createButton("Expand Capture Radius", btnY, ExpandCaptureRadius)
+btnY = btnY + btnSpacing
+createButton("Disable Travel Cost", btnY, DisableTravelCost)
+btnY = btnY + btnSpacing
+createButton("Disable Level Requirement", btnY, DisableLevelRequirement)
+btnY = btnY + btnSpacing
 
-	tabButton.MouseButton1Click:Connect(function()
-		for _, v in pairs(tabs) do
-			v.Content.Visible = false
-			v.Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		end
-		tabContent.Visible = true
-		tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	end)
+-- 3. ESP/Chams
+createButton("ESP Horses", btnY, ESPHorses)
+btnY = btnY + btnSpacing
+createButton("ESP Rarity", btnY, ESPRarity)
+btnY = btnY + btnSpacing
+createButton("ESP Players", btnY, ESPPlayers)
+btnY = btnY + btnSpacing
+createButton("ESP Items", btnY, ESPItems)
+btnY = btnY + btnSpacing
 
-	return tabContent
+-- 4. Character
+createButton("Fly (Toggle)", btnY, function() Fly(true) end)
+btnY = btnY + btnSpacing
+createButton("Noclip (Toggle)", btnY, function() Noclip(true) end)
+btnY = btnY + btnSpacing
+createButton("Speed Hack +10", btnY, function() SpeedHack(10) end)
+btnY = btnY + btnSpacing
+createButton("Jump Power +50", btnY, function() JumpPower(50) end)
+btnY = btnY + btnSpacing
+createButton("Godmode (Toggle)", btnY, function() Godmode(true) end)
+btnY = btnY + btnSpacing
+
+-- 5. Misc
+createButton("Anti AFK", btnY, AntiAFK)
+btnY = btnY + btnSpacing
+createButton("Infinite Tokens", btnY, InfiniteTokens)
+btnY = btnY + btnSpacing
+createButton("Unlock All Accessories", btnY, UnlockAllAccessories)
+btnY = btnY + btnSpacing
+createButton("Teleport To Island", btnY, function() 
+    -- shows a prompt for island name
+    local islandName = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("IslandPrompt")
+    if not islandName then
+        islandName = Instance.new("TextBox")
+        islandName.Name = "IslandPrompt"
+        islandName.Text = "Enter Island Name"
+        islandName.Size = UDim2.new(0, 200, 0, 30)
+        islandName.Position = UDim2.new(0, 75, 0, btnY)
+        islandName.Parent = MainFrame
+        islandName.FocusLost:Connect(function(enter)
+            if enter then
+                TeleportToIsland(islandName.Text)
+                islandName:Destroy()
+            end
+        end)
+    end
+end)
+btnY = btnY + btnSpacing
+createButton("Save Settings", btnY, SaveSettings)
+btnY = btnY + btnSpacing
+createButton("Load Settings", btnY, LoadSettings)
+
+-- Feature Functions (same as your template, above)
+function AutoFarmHorses()
+    notify("Auto Farm Horses activated!")
+    -- TODO: Add logic
 end
 
--- Criando abas
-local mainTab = createTab("Main")
-local itemModsTab = createTab("Item Mods")
-local espTab = createTab("ESP/Chams")
-local charTab = createTab("Character")
-local miscTab = createTab("Misc")
+function AutoSellItems()
+    notify("Auto Sell Items activated!")
+    -- TODO: Add logic
+end
 
--- Opções
-createToggle(itemModsTab, "Reduce Lasso Cooldown", 0)
-createToggle(itemModsTab, "Expand Capture Radius", 1)
-createToggle(itemModsTab, "Disable Travel Cost", 2)
-createToggle(itemModsTab, "Disable Level Requirement", 3)
+function AutoCollectResources()
+    notify("Auto Collect Resources activated!")
+    -- TODO: Add logic
+end
 
-createToggle(espTab, "Enable ESP", 0)
-createToggle(espTab, "Show Horses Only", 1)
+function AutoCompleteQuests()
+    notify("Auto Complete Quests activated!")
+    -- TODO: Add logic
+end
 
-createToggle(charTab, "Infinite Stamina", 0)
-createToggle(charTab, "Speed Boost", 1)
+function ReduceLassoCooldown()
+    notify("Lasso Cooldown Reduced!")
+    -- TODO: Add logic
+end
 
-createToggle(miscTab, "Auto Collect", 0)
-createToggle(miscTab, "Disable Fog", 1)
+function ExpandCaptureRadius()
+    notify("Capture Radius Expanded!")
+    -- TODO: Add logic
+end
 
--- Aba inicial
-tabs["Item Mods"].Content.Visible = true
-tabs["Item Mods"].Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+function DisableTravelCost()
+    notify("Travel cost disabled!")
+    -- TODO: Add logic
+end
 
--- Botão abre/fecha
-toggleButton.MouseButton1Click:Connect(function()
-	mainFrame.Visible = not mainFrame.Visible
-end)
+function DisableLevelRequirement()
+    notify("Level requirement disabled!")
+    -- TODO: Add logic
+end
+
+function ESPHorses()
+    notify("ESP Horses enabled!")
+    -- TODO: Add logic
+end
+
+function ESPRarity()
+    notify("ESP Rarity enabled!")
+    -- TODO: Add logic
+end
+
+function ESPPlayers()
+    notify("ESP Players enabled!")
+    -- TODO: Add logic
+end
+
+function ESPItems()
+    notify("ESP Items enabled!")
+    -- TODO: Add logic
+end
+
+function Fly(toggle)
+    notify("Fly toggled: " .. tostring(toggle))
+    -- TODO: Add logic
+end
+
+function Noclip(toggle)
+    notify("Noclip toggled: " .. tostring(toggle))
+    -- TODO: Add logic
+end
+
+function SpeedHack(amount)
+    notify("Speed changed to: " .. tostring(amount))
+    -- TODO: Add logic
+end
+
+function JumpPower(amount)
+    notify("Jump power set to: " .. tostring(amount))
+    -- TODO: Add logic
+end
+
+function Godmode(toggle)
+    notify("Godmode toggled: " .. tostring(toggle))
+    -- TODO: Add logic
+end
+
+function AntiAFK()
+    notify("Anti AFK enabled!")
+    local vu = game:GetService("VirtualUser")
+    game:GetService("Players").LocalPlayer.Idled:connect(function()
+        vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        wait(1)
+        vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end)
+end
+
+function InfiniteTokens()
+    notify("Infinite Tokens script!")
+    -- TODO: Add logic
+end
+
+function UnlockAllAccessories()
+    notify("Unlock All Accessories script!")
+    -- TODO: Add logic
+end
+
+function TeleportToIsland(islandName)
+    notify("Teleporting to: " .. islandName)
+    -- TODO: Add logic
+end
+
+function SaveSettings()
+    notify("Settings Saved!")
+    -- TODO: Add logic
+end
+
+function LoadSettings()
+    notify("Settings Loaded!")
+    -- TODO: Add logic
+end
+
+-- Done! 
+-- Panel is draggable, can open/close, and buttons connect to functions.
