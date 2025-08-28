@@ -1,40 +1,52 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local mouse = player:GetMouse()
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RedzHub"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Criar GUI
-local ScreenGui = script.Parent
-local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 250, 0, 300)
-Frame.Position = UDim2.new(0, 50, 0, 100)
-Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Frame.Active = true
-Frame.Draggable = true -- permite arrastar
-Frame.Visible = true
+-- Criando o Frame principal
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 400, 0, 420)
+MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner", Frame)
-UICorner.CornerRadius = UDim.new(0,10)
+-- Título
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Title.Text = "REDz HUB v3.5 : Brookhaven RP"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.Parent = MainFrame
 
--- Botão abrir/fechar
-local ToggleButton = Instance.new("TextButton", ScreenGui)
-ToggleButton.Size = UDim2.new(0,100,0,40)
-ToggleButton.Position = UDim2.new(0,50,0,60)
-ToggleButton.Text = "Abrir/Fechar Painel ADM"
-ToggleButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+-- Lista lateral (abas)
+local Tabs = {"início", "Casas", "Carros", "Trolar", "Teleportes", "Itens do avatar", "Itens", "Visual/Cliente", "Segredos", "outros"}
 
-ToggleButton.MouseButton1Click:Connect(function()
-	Frame.Visible = not Frame.Visible
-end)
+local UIListLayout = Instance.new("UIListLayout")
 
--- Função para criar botões
-local function createButton(name, posY)
-	local btn = Instance.new(
- local dir = directions[math.random(1,#directions)]
-                char.Humanoid:Move(dir, true)
-            end
-        end)
-    else
-        if iaConn then iaConn:Disconnect() end
-        btnIA.Text = "IA Movement"
-    end
-end)
+local SideMenu = Instance.new("Frame")
+SideMenu.Size = UDim2.new(0, 110, 1, -40)
+SideMenu.Position = UDim2.new(0, 0, 0, 40)
+SideMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SideMenu.Parent = MainFrame
+
+UIListLayout.Parent = SideMenu
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+for _,tab in pairs(Tabs) do
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, 0, 0, 30)
+    Button.Text = tab
+    Button.TextColor3 = Color3.fromRGB(255,255,255)
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.Font = Enum.Font.Gotham
+    Button.TextSize = 14
+    Button.Parent = SideMenu
+end
+
+-- Área de conteúdo
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(1, -110, 1, -40)
+ContentFrame.Position = UDim2.new(0, 110, 0, 40)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(
